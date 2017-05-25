@@ -1,0 +1,160 @@
+* { font-family: Arial, Helvetica, sans-serif; }
+html, body { background-color: #000; }
+
+button {
+  border-radius: 3px;
+  border: 1px solid black;
+  display: inline-block;
+  cursor: pointer;
+  color: white;
+  font-size:16px;
+  text-shadow:0px 1px 0px #222;
+}
+button.red { background-color: #d41; border-color: #921; }
+button.red:hover { background-color: #b31; }
+button.red:active { background-color: #a20; }
+button.green { background-color: #4b1; border-color: #281; }
+button.green:hover { background-color: #391; }
+button.green:active { background-color: #280; }
+button.choice {
+  vertical-align: top;
+  font-size: 28px;
+  width: 60px;
+  height: 45px;
+  line-height: 45px;
+  margin: 0 5px;
+  text-align: center;
+}
+button.choice.enabled { background-color: #14c; border-color: #129; }
+button.choice.enabled:hover { background-color: #13a; }
+button.choice.enabled:active { background-color: #029; }
+button.choice { background-color: #aaa; border-color: #999; }
+
+/* ################################################ */
+
+#frame {
+  background: #112;
+  width: 300px;
+  height: 400px;
+  position: relative;
+  margin: 50px auto;
+  overflow: hidden;
+}
+#background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: #eff;
+}
+
+#message {
+  text-align: center;
+  display: none;
+  position: absolute;
+  top: 140px;
+  left: 0;
+  width: 100%;
+}
+#message-1 {
+  margin: 0;
+  font-size: 36px;
+  text-shadow: -3px 0 2px red, 3px 0 2px green;
+  color: #ffe;
+}
+#message-2, #message-3 {
+  margin: 5px;
+  font-size: 15px;
+  line-height: 1.2;
+}
+#message-2 { color: #ffe; display: none; }
+#message-3 { color: #fcc; }
+
+#candle-box {
+  position: absolute;
+  left: 18px;
+  bottom: 50px;
+  width: 264px;
+  height: 85px;
+}
+.candle {
+  position: absolute;
+  background-image: url('candles.gif');
+  width: 10px;
+  height: 90px;
+  /* background-position: -10px 0; */
+}
+.candle.clickable {
+  cursor: pointer;
+}
+.candle.out {
+  background-image: url('candles-out.png');
+}
+
+#cake {
+  position: absolute;
+  bottom: -6px;
+  left: 6px;
+}
+
+#cover {
+  display: none;
+  position: absolute;
+  top; 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ################################################ */
+
+#level {
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  font-size: 16px;
+}
+
+#digit-box {
+  position: absolute;
+  left: 5px;
+  width: 280px;
+  top: 30px;
+  height: 90px;
+  text-align: center;
+  padding: 0;
+  background-color: #333;
+  border: 5px solid black;
+}
+.digit {
+  background: url('digits.png');
+  display: inline-block;
+  width: 70px;
+  height: 90px;
+}
+.power-box {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: yellow;
+}
+
+#button-box {
+  position: absolute;
+  left: 0;
+  width: 300px;
+  top: 145px;
+  height: 60px;
+  text-align: center;
+}
+#action {
+  position: absolute;
+  top: 210px;
+  width: 140px;
+  height: 40px;
+  left: 80px;
+}
+
