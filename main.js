@@ -4,13 +4,13 @@ $(function () {
 
   function displayNum(num, effect) {
     currentNum = num;
-    if (effect == 'power') {
+    if (effect == 'power2' || effect == 'power3' || effect == 'powerR2') {
       $('#cover').show();
       displayNum(currentNum);
       $('#digit-box').prepend(
-          $('<div class=power-box>').fadeOut(function () {
-            $('#cover').hide();
-          }));
+        $('<div>').addClass(effect + '-box').fadeOut(function () {
+          $('#cover').hide();
+        }));
       return; 
     } if (effect == 'rotate') {
       $('#cover').show();
@@ -26,14 +26,6 @@ $(function () {
         }
       });
       return;
-    } else if (effect == 'spill') {
-      $('#cover').show();
-      displayNum(('' + num).replace(/6/g, ';'));
-      window.setTimeout(function () {
-        displayNum(num);
-        $('#cover').hide();
-      }, 400);
-      return;
     }
     var stringForm = '' + num, i, x;
     $('#digit-box').empty();
@@ -47,51 +39,69 @@ $(function () {
 
   // ################################################
 
-  var LEVELS = [
-    {name: '1 (A)', start: 6, buttons: ['×4']},
-    {name: '1 (B)', start: 9, buttons: ['×2', '+3']},
-    {name: '2 (A)', start: 7, buttons: ['×5', '+4', '−3']},
-    {name: '2 (B)', start: 8, buttons: ['÷2', '−8', '×7']},
-    {name: '3 (A)', start: 6, buttons: ['×8', '−5', '−3', '−2']},
-    {name: '3 (B)', start: 3, buttons: ['×7', '÷7', '+3']},
-    {name: '4 (A)', start: 2, buttons: ['−1', '−3', '−4', 'A']},
-    {name: '4 (B)', start: 2, buttons: ['×4', '+7', 'B']},
-    {name: '4 (C)', start: ':', buttons: ['×2', '×2', 'C']},
-  ];
+  var SQUARE = 'Square', CUBE = 'Cube', SQRT = 'Sqrt', ROTATE = 'Rotate';
+  var ROTATE_MAP = {0: 0, 1: 1, 2: 2, 3: '/', 4: ':', 5: 5,
+    6: 9, 7: ';', 8: 8, 9: 6}
 
-  function checkVictory(candles) {
+  var LEVELS = [
+    {start: 6, buttons: ['×4']},
+    {start: 9, buttons: ['×2', '+3']},
+    {start: 8, buttons: ['-4', '×6']},
+    {start: 7, buttons: ['×5', '+4', '-3']},
+    {start: 8, buttons: ['÷2', '-8', '×7']},
+    {start: 8, buttons: ['+4', '×4', '÷4']},
+    {start: 6, buttons: ['+6', '÷2', '×7']},
+    {start: 8, buttons: ['+7', '-1', '×3', '÷7']},
+    {start: 7, buttons: ['+6', '-8', '×8', '×3']},
+    {start: 8, buttons: ['+1', '+5', '÷3', '×8']},
+    {start: 1, buttons: ['×3', '-7', '+8', '×0']},
+    // Harder levels
+    {start: 3, buttons: ['×7', '÷7', '+3']},
+    {start: 2, buttons: ['+2', '×9', '÷3']},
+    {start: 7, buttons: ['÷6', '-3', '×9', '+2']},
+    {start: 0, buttons: ['×9', '+3', '-1', '÷3']},
+    {start: 8, buttons: ['3-', '×6', '-9']},
+    {start: 6, buttons: ['9÷', '÷8', '×2']},
+    {start: 2, buttons: [SQUARE, '×6', '÷6']},
+    {start: 2, buttons: [SQUARE, '-1', '-3', '-4']},
+    {start: 2, buttons: [CUBE, '×3', '÷9']},
+    {start: 9, buttons: [SQRT, '×6', '+1']},
+    {start: 2, buttons: [ROTATE, '×4', '+7']},
+    {start: 9, buttons: [ROTATE, SQUARE, '+6']},
+    /*
+    {start: , buttons: []},
+    */
+  ];
+  console.log(LEVELS.length);
+
+  function checkVictory() {
     if ($('.choice.enabled').length == 0 && currentNum == 24) {
-      $('#action').prop('disabled', true);
+      $('#action').prop('disabled', true).removeClass().addClass('gray');
       // Begin candle showing
-      var candlesAnimating = candles;
-      for (var i = 0; i < candles; i++) {
-        var color = Math.floor(Math.random() * 6) * 10;
-        $('<div class=candle>').appendTo('#candle-box')
-          .css({
-            'background-position': '-' + color + 'px -1px',
-            'top': '100px',
-            'left': '' + (currentCandles * 11) + 'px'
-          })
-          .animate({top: 0}, function () {
-            candlesAnimating--;
-            if (candlesAnimating == 0) {
-              $('#action').prop('disabled', false)
-                .removeClass().addClass('green').text('NEXT');
-            }
-          });
-        currentCandles++;
-      }
+      var color = Math.floor(Math.random() * 6) * 10;
+      $('<div class=candle>').appendTo('#candle-box')
+        .css({
+          'background-position': '-' + color + 'px -1px',
+          'top': '100px',
+          'left': '' + (currentCandles * 11) + 'px'
+        })
+        .animate({top: 0}, function () {
+          $('#action').prop('disabled', false)
+            .removeClass().addClass('green').text('NEXT');
+        });
+      currentCandles++;
     }
   }
 
-  function loadLevel(level) {
-    $('#level').text('Level ' + level.name);
+  function loadLevel() {
+    var level = LEVELS[currentLevel];
+    $('#level').text('Level ' + (currentLevel + 1));
     displayNum(level.start);
     $('#button-box').empty();
     level.buttons.forEach(function (spec) {
       var button = $('<button class="choice enabled">');
       if (spec.length == 2) {
-        button.text(spec);
+        button.text(spec.replace(/-/g, '−'));
       } else {
         button.append($('<img src=special' + spec + '.png>'));
       }
@@ -101,44 +111,46 @@ $(function () {
         var newNum, effect = undefined;
         if (spec.charAt(0) == '+') {
           newNum = (currentNum + (+spec.charAt(1)));
-        } else if (spec.charAt(0) == '−') {
+        } else if (spec.charAt(0) == '-') {
           newNum = (currentNum - (+spec.charAt(1)));
         } else if (spec.charAt(0) == '×') {
-          if (currentNum == ':') {
-            newNum = '::';
-          } else if (currentNum == '::') {
-            newNum = '::::';
-          } else {
-            newNum = (currentNum * (+spec.charAt(1)));
-          }
+          newNum = (currentNum * (+spec.charAt(1)));
         } else if (spec.charAt(0) == '÷') {
           newNum = (currentNum / (+spec.charAt(1)));
-        } else if (spec == 'A') {
-          effect = 'power';
+        } else if (spec.charAt(1) == '-') {
+          newNum = ((+spec.charAt(0)) - currentNum);
+        } else if (spec.charAt(1) == '÷') {
+          newNum = ((+spec.charAt(0)) / currentNum);
+        } else if (spec == SQUARE) {
+          effect = 'power2';
           newNum = (currentNum * currentNum);
-        } else if (spec == 'B') {
+        } else if (spec == CUBE) {
+          effect = 'power3';
+          newNum = (currentNum * currentNum * currentNum);
+        } else if (spec == SQRT) {
+          effect = 'powerR2';
+          newNum = Math.sqrt(currentNum);
+        } else if (spec == ROTATE) {
           effect = 'rotate';
-          switch (currentNum) {
-            case 2: newNum = 2; break;
-            case 9: newNum = 6; break;
-            case 8: newNum = 8; break;
-            case 36: newNum = '9/'; break;
-            case 15: newNum = 51; break;
-            default: alert('ERROR: Unhandled!');
-          }
-        } else if (spec == 'C') {
-          effect = 'spill';
-          switch (currentNum) {
-            case ':': newNum = 6; break;
-            case '::': newNum = 66; break;
-            case '::::': newNum = 6666; break;
-            default: alert('ERROR: Unhandled!');
+          if (currentNum < 0 || Math.abs(currentNum - Math.floor(currentNum)) > 1e-6) {
+            alert('ERROR: Unhandled!');
+          } else {
+            var stringForm = '' + Math.floor(currentNum), allDigits = true;
+            newNum = '';
+            for (var i = 0; i < stringForm.length; i++) {
+              newNum = '' + ROTATE_MAP[+stringForm[i]] + newNum;
+              if (typeof ROTATE_MAP[+stringForm[i]] === 'string')
+                allDigits = false;
+            }
+            if (allDigits && (newNum == '0' || newNum.charAt(0) != '0')) {
+              newNum = +newNum;
+            }
           }
         } else {
           alert('ERROR: Unhandled!');
         }
         displayNum(newNum, effect);
-        checkVictory(+level.name.charAt(0));
+        checkVictory();
       });
       $('#button-box').append(button);
     });
@@ -150,10 +162,11 @@ $(function () {
     if (text == 'START') {
       // Start at level 0
       currentLevel = 0;
-      loadLevel(LEVELS[currentLevel]);
+      currentLevel = 20;
+      loadLevel();
       $('#action').removeClass().addClass('red').text('RESET');
     } else if (text == 'RESET') {
-      loadLevel(LEVELS[currentLevel]);
+      loadLevel();
     } else if (text == 'NEXT') {
       currentLevel++;
       if (currentLevel >= LEVELS.length) {
@@ -180,7 +193,7 @@ $(function () {
           $('#cover').hide();
         });
       } else {
-        loadLevel(LEVELS[currentLevel]);
+        loadLevel();
         $('#action').removeClass().addClass('red').text('RESET');
       }
     } else if (text == 'SEND') {

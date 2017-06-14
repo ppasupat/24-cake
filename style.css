@@ -13,6 +13,7 @@ button {
 button.red { background-color: #d41; border-color: #921; }
 button.red:hover { background-color: #b31; }
 button.red:active { background-color: #a20; }
+button.gray { background-color: #aaa; border-color: #999; }
 button.green { background-color: #4b1; border-color: #281; }
 button.green:hover { background-color: #391; }
 button.green:active { background-color: #280; }
@@ -29,6 +30,10 @@ button.choice.enabled { background-color: #14c; border-color: #129; }
 button.choice.enabled:hover { background-color: #13a; }
 button.choice.enabled:active { background-color: #029; }
 button.choice { background-color: #aaa; border-color: #999; }
+button.choice img {
+  display: block;
+  margin: auto;
+}
 
 /* ################################################ */
 
@@ -133,14 +138,16 @@ button.choice { background-color: #aaa; border-color: #999; }
   width: 70px;
   height: 90px;
 }
-.power-box {
+.power2-box, .power3-box, .powerR2-box {
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: yellow;
 }
+.power2-box { background-color: yellow; }
+.power3-box { background-color: orange; }
+.powerR2-box { background-color: lawngreen; }
 
 #button-box {
   position: absolute;

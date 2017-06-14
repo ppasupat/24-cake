@@ -23,10 +23,15 @@ GIMMICKS = {
         'r/': RDiv(range(10)),
         '^2': Square(),
         '^3': Cube(),
+        '2^': TwoPower(),
         'sqrt': Sqrt(),
         'cbrt': Cbrt(),
         'flip': Flip(),
         'fact': Factorial(),
+        'sin': Sin(),
+        'cos': Cos(),
+        'tan': Tan(),
+        'abs': Abs(),
         }
 
 
@@ -89,6 +94,26 @@ def get_sample(states, target):
         target = derivs[i][0]
     return sample[::-1]
 
+def check_same(sample):
+    y = None
+    used_ops = set()
+    for item in sample[1:]:
+        if len(item) <= 2:
+            return False
+        if y is None:
+            y = item[2]
+        elif y != item[2] or item[1].name in used_ops:
+            return False
+        used_ops.add(item[1].name)
+    return True
+
+def check_later_mul0(sample):
+    if sample[1][1].name == '*' and sample[1][2] == 0:
+        return False
+    for item in sample[2:]:
+        if item[1].name == '*' and item[2] == 0:
+            return True
+    return False
 
 def check_multisol(sample):
     init = sample[0][0]
@@ -126,16 +151,37 @@ def main():
             help='number of operations')
     parser.add_argument('-s', '--num-samples', type=int, default=100,
             help='number of samples')
+    parser.add_argument('-i', '--init-nums', type=float, nargs='+')
     parser.add_argument('-g', '--gimmicks', nargs='+')
+    parser.add_argument('-r', '--restrictions', nargs='+')
     args = parser.parse_args()
 
-    if not args.gimmicks:
-        gimmicks = []
-    else:
-        gimmicks = [GIMMICKS[x] for x in args.gimmicks]
+    gimmicks = [GIMMICKS[x] for x in (args.gimmicks or [])]
+    checkers = []
 
-    init_states = {(float(x), (False,) * len(gimmicks)): [(None, 1, x)] for x in range(10)}
+    for r in (args.restrictions or []):
+        if r == 'x0':
+            BASIC_OPS[2] = Mul(xrange(2, 10))
+        elif r == 'same':
+            checkers.append(check_same)
+        elif r.startswith('same='):
+            y = float(r[5:])
+            BASIC_OPS[0] = Add([y])
+            BASIC_OPS[1] = Sub([y])
+            BASIC_OPS[2] = Mul([y])
+            BASIC_OPS[3] = Div([y])
+            checkers.append(check_same)
+        elif r == 'later_mul0':
+            checkers.append(check_later_mul0)
+        else:
+            raise ValueError('Unknown restriction {}'.format(r))
+
+    if not args.init_nums:
+        args.init_nums = range(10)
+    init_states = {(float(x), (False,) * len(gimmicks)): [(None, 1, x)]
+            for x in args.init_nums}
     states = [init_states]
+
     for i in xrange(args.num_steps):
         states.append(bfs(states[-1], gimmicks))
         print >> sys.stderr, 'Step {}: Found {} states'.format(i, len(states[-1]))
@@ -143,6 +189,9 @@ def main():
     # Sample uniformly
     for s in xrange(args.num_samples):
         sample = get_sample(states, (24, (True,) * len(gimmicks)))
+        if not all(checker(sample) for checker in checkers):
+            pretty_print(sample, prefix='FAIL ')
+            continue
         try:
             multisols = list(check_multisol(sample))
             if not multisols:

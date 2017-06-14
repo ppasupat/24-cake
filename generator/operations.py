@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import math
+
 
 class Operation(object):
 
@@ -69,6 +71,11 @@ class Cube(OneArgOperation):
     def __call__(self, x):
         return x * x * x
 
+class TwoPower(OneArgOperation):
+    name = '2^'
+    def __call__(self, x):
+        return 2. ** x
+
 class Sqrt(OneArgOperation):
     name = 'sqrt'
     def __call__(self, x):
@@ -103,3 +110,23 @@ class Factorial(OneArgOperation):
         x = int(x)
         assert x in self.MAP
         return float(self.MAP[x])
+
+class Sin(OneArgOperation):
+    name = 'sin'
+    def __call__(self, x):
+        return math.sin(x * math.pi / 180.)
+
+class Cos(OneArgOperation):
+    name = 'cos'
+    def __call__(self, x):
+        return math.cos(x * math.pi / 180.)
+
+class Tan(OneArgOperation):
+    name = 'tan'
+    def __call__(self, x):
+        return math.tan(x * math.pi / 180.)
+
+class Abs(OneArgOperation):
+    name = 'abs'
+    def __call__(self, x):
+        return abs(x)
