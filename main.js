@@ -53,24 +53,21 @@ $(function () {
     {start: 6, buttons: ['+6', '÷2', '×7']},
     {start: 8, buttons: ['+7', '-1', '×3', '÷7']},
     {start: 7, buttons: ['+6', '-8', '×8', '×3']},
+    {start: 8, buttons: ['3-', '×6', '-9']},
     {start: 8, buttons: ['+1', '+5', '÷3', '×8']},
     {start: 1, buttons: ['×3', '-7', '+8', '×0']},
-    // Harder levels
-    {start: 3, buttons: ['×7', '÷7', '+3']},
-    {start: 2, buttons: ['+2', '×9', '÷3']},
-    {start: 7, buttons: ['÷6', '-3', '×9', '+2']},
-    {start: 0, buttons: ['×9', '+3', '-1', '÷3']},
-    {start: 8, buttons: ['3-', '×6', '-9']},
     {start: 6, buttons: ['9÷', '÷8', '×2']},
+    {start: 3, buttons: ['×7', '÷7', '+3']},
+    {start: 0, buttons: ['×9', '+3', '-1', '÷3']},
     {start: 2, buttons: [SQUARE, '×6', '÷6']},
     {start: 2, buttons: [SQUARE, '-1', '-3', '-4']},
+    {start: 7, buttons: ['÷6', '-3', '×9', '+2']},
     {start: 2, buttons: [CUBE, '×3', '÷9']},
     {start: 9, buttons: [SQRT, '×6', '+1']},
+    {start: 8, buttons: [SQRT, SQUARE, '×9']},
     {start: 2, buttons: [ROTATE, '×4', '+7']},
     {start: 9, buttons: [ROTATE, SQUARE, '+6']},
-    /*
-    {start: , buttons: []},
-    */
+    {start: 9, buttons: [ROTATE, ROTATE, '+3', '+6']},
   ];
   console.log(LEVELS.length);
 
@@ -162,7 +159,6 @@ $(function () {
     if (text == 'START') {
       // Start at level 0
       currentLevel = 0;
-      currentLevel = 20;
       loadLevel();
       $('#action').removeClass().addClass('red').text('RESET');
     } else if (text == 'RESET') {
@@ -177,9 +173,9 @@ $(function () {
           count--;
           if (count != 0) return;
           $('#message').append($('<p id=message-1>Happy Birthday!</p>'));
-          $('#message').append($('<p id=message-3>ขอพรแล้วเป่าเทียนนะครับ</p>'));
-          $('#message').append($('<p id=message-2>ขอให้ออยมีความสุขมากๆ '
-               + 'ทำอะไรก็ให้ได้สมใจปรารถนาทุกประการนะครับ</p>'));
+          $('#message').append($('<p id=message-3>Make a wish and blow out the candles.</p>'));
+          $('#message').append($('<p id=message-2>Wish you a wonderful year of happiness, '
+              + 'success, and good health.</p>'));
           $('#message').fadeIn();
           var candlesLeft = $('.candle').length;
           $('.candle').addClass('clickable').click(function() {
@@ -196,15 +192,14 @@ $(function () {
         loadLevel();
         $('#action').removeClass().addClass('red').text('RESET');
       }
-    } else if (text == 'SEND') {
-
-
     }
   });
 
   var images = [];
   // Preload images
-  ['cake.png', 'candles-out.png', 'digits.png', 'specialA.png', 'specialB.png', 'specialC.png'].forEach(function (x) {
+  ['cake.png', 'candles-out.png', 'digits.png',
+    'specialSquare.png', 'specialCube.png', 'specialSqrt.png', 'specialRotate.png',
+    ].forEach(function (x) {
     var img = new Image();
     img.src = x;
     images.push(img);
