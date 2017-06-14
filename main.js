@@ -197,7 +197,7 @@ $(function () {
 
   var images = [];
   // Preload images
-  ['cake.png', 'candles-out.png', 'digits.png',
+  ['cake.png', 'candles.gif', 'candles-out.png', 'digits.png',
     'specialSquare.png', 'specialCube.png', 'specialSqrt.png', 'specialRotate.png',
     ].forEach(function (x) {
     var img = new Image();
