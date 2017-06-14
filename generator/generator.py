@@ -9,26 +9,24 @@ from collections import defaultdict, Counter
 import numpy as np
 from numpy.random import choice
 
+from operations import *
 
-CHECK = {
-        '+': lambda x, y: y != 0,
-        '-': lambda x, y: y != 0,
-        'r-': lambda x, y: True,
-        '*': lambda x, y: y != 1,
-        '/': lambda x, y: y != 0 and y != 1,
-        'r/': lambda x, y: x != 0,
-        }
-OPERATORS = {
-        '+': lambda x, y: x + y,
-        '-': lambda x, y: x - y,
-        'r-': lambda x, y: y - x,
-        '*': lambda x, y: x * y,
-        '/': lambda x, y: x / y,
-        'r/': lambda x, y: y / x,
+
+BASIC_OPS = [
+        Add(range(1, 10)),
+        Sub(range(1, 10)),
+        Mul([0] + range(2, 10)),
+        Div(range(2, 10)),
+        ]
+GIMMICKS = {
+        'r-': RSub(range(10)),
+        'r/': RDiv(range(10)),
+        '^2': Square(),
+        'sqrt': Sqrt(),
         }
 
 
-def bfs(old_states, gimmicks=None):
+def bfs(old_states, gimmicks):
     """
     Args:
         old_states: previous new_states
@@ -41,20 +39,31 @@ def bfs(old_states, gimmicks=None):
                 num_prev_derivs, *operation_and_args)
     """
     new_states = defaultdict(list)
-    for x, g in old_states:
-        s = sum(deriv[1] for deriv in old_states[x])
-        for op in ('+', '-', '*', '/'):
-            for y in range(10):
-                if not CHECK[op](x, y):
-                    continue
-                result = OPERATORS[op](x, y)
-                new_states[result].append((x, s, op, y))
+    for state in old_states:
+        x, g = state
+        s = sum(deriv[1] for deriv in old_states[state])
+        for op in BASIC_OPS:
+            for args in op.generate():
+                try:
+                    result = op(x, *args)
+                    new_states[result, g].append((state, s, op) + args)
+                except AssertionError:
+                    pass
+        for i, op in enumerate(gimmicks):
+            if g[i]:
+                continue
+            for args in op.generate():
+                try:
+                    result = op(x, *args)
+                    new_g = g[:i] + (True,) + g[i+1:]
+                    new_states[result, new_g].append((state, s, op) + args)
+                except AssertionError:
+                    pass
     return new_states
 
 
-def get_sample(states):
+def get_sample(states, target):
     sample = []
-    target = 24.0
     for state in reversed(states):
         derivs = state[target]
         p = np.array([deriv[1] * 1. for deriv in derivs])
@@ -65,7 +74,7 @@ def get_sample(states):
 
 
 def check_multisol(sample):
-    init = sample[0][0]
+    init = sample[0][0][0]
     rest = tuple(x[1:] for x in sample[1:])
     for perm in set(permutations(rest)):
         if perm == rest:
@@ -73,14 +82,19 @@ def check_multisol(sample):
         perm_sample = [sample[0]]
         x = init
         for op_args in perm:
-            x = OPERATORS[op_args[0]](x, *op_args[1:])
+            op, args = op_args[0], op_args[1:]
+            x = op(x, *args)
             perm_sample.append((x,) + op_args)
         if x == 24.0:
             yield perm_sample
 
 def pretty_print(sample):
-    for step in sample:
-        print ' '.join(str(x) for x in step[1:] + ('=', step[0])),
+    print sample[0][0][0],
+    for step in sample[1:]:
+        print step[1].name,
+        if step[2:]:
+            print ' '.join(str(x) for x in step[2:]),
+        print '=', step[0][0],
     print
 
 
@@ -90,24 +104,29 @@ def main():
             help='number of operations')
     parser.add_argument('-s', '--num-samples', type=int, default=100,
             help='number of samples')
+    parser.add_argument('-g', '--gimmicks', nargs='+')
     args = parser.parse_args()
 
-    init_states = {float(x): [(float(x), 1, x)] for x in range(10)}
+    if not args.gimmicks:
+        gimmicks = []
+    else:
+        gimmicks = [GIMMICKS[x] for x in args.gimmicks]
+
+    init_states = {(float(x), (False,) * len(gimmicks)): [(None, 1, x)] for x in range(10)}
     states = [init_states]
     for i in xrange(args.num_steps):
-        states.append(bfs(states[-1]))
+        states.append(bfs(states[-1], gimmicks))
         print >> sys.stderr, 'Step {}: Found {} states'.format(i, len(states[-1]))
     
     # Sample uniformly
     for s in xrange(args.num_samples):
-        sample = get_sample(states)
-        multisols = list(check_multisol(sample))
-        if not multisols:
-            pretty_print(sample)
-        #pretty_print(sample)
-        #for perm_sample in multisols:
-        #    print '  >',
-        #    pretty_print(perm_sample)
+        sample = get_sample(states, (24, (True,) * len(gimmicks)))
+        try:
+            multisols = list(check_multisol(sample))
+            if not multisols:
+                pretty_print(sample)
+        except AssertionError:
+            pass
 
 
 if __name__ == '__main__':
