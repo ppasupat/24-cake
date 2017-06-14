@@ -22,8 +22,21 @@ GIMMICKS = {
         'r-': RSub(range(10)),
         'r/': RDiv(range(10)),
         '^2': Square(),
+        '^3': Cube(),
         'sqrt': Sqrt(),
+        'cbrt': Cbrt(),
+        'flip': Flip(),
+        'fact': Factorial(),
         }
+
+
+def displayable(x):
+    if isinstance(x, str):
+        return len(x) <= 4
+    if abs(x - int(x)) < 1e-6:
+        x = int(x)
+        return -999 <= x <= 9999
+    return -10 < x < 100
 
 
 def bfs(old_states, gimmicks):
@@ -46,6 +59,7 @@ def bfs(old_states, gimmicks):
             for args in op.generate():
                 try:
                     result = op(x, *args)
+                    assert isinstance(result, float) and displayable(result)
                     new_states[result, g].append((state, s, op) + args)
                 except AssertionError:
                     pass
@@ -55,6 +69,9 @@ def bfs(old_states, gimmicks):
             for args in op.generate():
                 try:
                     result = op(x, *args)
+                    if isinstance(result, int):
+                        result = float(result)
+                    assert isinstance(result, float) and displayable(result)
                     new_g = g[:i] + (True,) + g[i+1:]
                     new_states[result, new_g].append((state, s, op) + args)
                 except AssertionError:
@@ -68,33 +85,38 @@ def get_sample(states, target):
         derivs = state[target]
         p = np.array([deriv[1] * 1. for deriv in derivs])
         i = choice(len(p), p=(p / p.sum()))
-        sample.append((target,) + derivs[i][2:])
+        sample.append((target[0],) + derivs[i][2:])
         target = derivs[i][0]
     return sample[::-1]
 
 
 def check_multisol(sample):
-    init = sample[0][0][0]
+    init = sample[0][0]
     rest = tuple(x[1:] for x in sample[1:])
     for perm in set(permutations(rest)):
         if perm == rest:
             continue
         perm_sample = [sample[0]]
         x = init
-        for op_args in perm:
+        for i, op_args in enumerate(perm):
             op, args = op_args[0], op_args[1:]
             x = op(x, *args)
             perm_sample.append((x,) + op_args)
+            if isinstance(x, int):
+                x = float(x)
+            if i != len(perm) - 1:
+                assert isinstance(x, float)
+            assert displayable(x)
         if x == 24.0:
             yield perm_sample
 
-def pretty_print(sample):
-    print sample[0][0][0],
+def pretty_print(sample, prefix):
+    print prefix, sample[0][0],
     for step in sample[1:]:
         print step[1].name,
         if step[2:]:
             print ' '.join(str(x) for x in step[2:]),
-        print '=', step[0][0],
+        print '=', step[0],
     print
 
 
@@ -124,9 +146,11 @@ def main():
         try:
             multisols = list(check_multisol(sample))
             if not multisols:
-                pretty_print(sample)
+                pretty_print(sample, prefix='OK   ')
+            else:
+                pretty_print(sample, prefix='MULTI')
         except AssertionError:
-            pass
+            pretty_print(sample, prefix='ERROR')
 
 
 if __name__ == '__main__':
