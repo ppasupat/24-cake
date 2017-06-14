@@ -50,11 +50,11 @@ $(function () {
   var LEVELS = [
     {name: '1 (A)', start: 6, buttons: ['×4']},
     {name: '1 (B)', start: 9, buttons: ['×2', '+3']},
-    {name: '2 (A)', start: 7, buttons: ['×5', '+4', '-3']},
-    {name: '2 (B)', start: 8, buttons: ['÷2', '-8', '×7']},
-    {name: '3 (A)', start: 6, buttons: ['×8', '-5', '-3', '-2']},
+    {name: '2 (A)', start: 7, buttons: ['×5', '+4', '−3']},
+    {name: '2 (B)', start: 8, buttons: ['÷2', '−8', '×7']},
+    {name: '3 (A)', start: 6, buttons: ['×8', '−5', '−3', '−2']},
     {name: '3 (B)', start: 3, buttons: ['×7', '÷7', '+3']},
-    {name: '4 (A)', start: 2, buttons: ['-1', '-3', '-4', 'A']},
+    {name: '4 (A)', start: 2, buttons: ['−1', '−3', '−4', 'A']},
     {name: '4 (B)', start: 2, buttons: ['×4', '+7', 'B']},
     {name: '4 (C)', start: ':', buttons: ['×2', '×2', 'C']},
   ];
@@ -101,7 +101,7 @@ $(function () {
         var newNum, effect = undefined;
         if (spec.charAt(0) == '+') {
           newNum = (currentNum + (+spec.charAt(1)));
-        } else if (spec.charAt(0) == '-') {
+        } else if (spec.charAt(0) == '−') {
           newNum = (currentNum - (+spec.charAt(1)));
         } else if (spec.charAt(0) == '×') {
           if (currentNum == ':') {
