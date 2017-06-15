@@ -4,7 +4,7 @@ $(function () {
 
   function displayNum(num, effect) {
     currentNum = num;
-    if (effect == 'power2' || effect == 'power3' || effect == 'powerR2') {
+    if (typeof effect == 'string' && effect.startsWith('power')) {
       $('#cover').show();
       displayNum(currentNum);
       $('#digit-box').prepend(
@@ -51,22 +51,22 @@ $(function () {
     {start: 8, buttons: ['÷2', '-8', '×7']},
     {start: 8, buttons: ['+4', '×4', '÷4']},
     {start: 6, buttons: ['+6', '÷2', '×7']},
-    {start: 8, buttons: ['+7', '-1', '×3', '÷7']},
     {start: 7, buttons: ['+6', '-8', '×8', '×3']},
     {start: 8, buttons: ['3-', '×6', '-9']},
     {start: 8, buttons: ['+1', '+5', '÷3', '×8']},
-    {start: 1, buttons: ['×3', '-7', '+8', '×0']},
     {start: 6, buttons: ['9÷', '÷8', '×2']},
+    {start: 1, buttons: ['×3', '-7', '+8', '×0']},
     {start: 3, buttons: ['×7', '÷7', '+3']},
     {start: 0, buttons: ['×9', '+3', '-1', '÷3']},
     {start: 2, buttons: [SQUARE, '×6', '÷6']},
     {start: 2, buttons: [SQUARE, '-1', '-3', '-4']},
-    {start: 7, buttons: ['÷6', '-3', '×9', '+2']},
     {start: 2, buttons: [CUBE, '×3', '÷9']},
+    {start: 3, buttons: [SQUARE, CUBE, '÷3', '-3']},
     {start: 9, buttons: [SQRT, '×6', '+1']},
     {start: 8, buttons: [SQRT, SQUARE, '×9']},
     {start: 2, buttons: [ROTATE, '×4', '+7']},
     {start: 9, buttons: [ROTATE, SQUARE, '+6']},
+    {start: 2, buttons: [ROTATE, CUBE, '+4', '+3']},
     {start: 9, buttons: [ROTATE, ROTATE, '+3', '+6']},
   ];
   console.log(LEVELS.length);
@@ -75,7 +75,7 @@ $(function () {
     if ($('.choice.enabled').length == 0 && currentNum == 24) {
       $('#action').prop('disabled', true).removeClass().addClass('gray');
       // Begin candle showing
-      var color = Math.floor(Math.random() * 6) * 10;
+      var color = (currentCandles % 6) * 10;
       $('<div class=candle>').appendTo('#candle-box')
         .css({
           'background-position': '-' + color + 'px -1px',
